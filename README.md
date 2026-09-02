@@ -1,1 +1,0 @@
-Etnova Pharma V8 – refreshed responsive website. Mobile hamburger navigation, improved colors, responsive Contact Supplier button, and touch-friendly layouts. Replace placeholder company contact details before launch.
