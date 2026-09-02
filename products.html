@@ -14,11 +14,11 @@
     <h2 id="modalTitle">Request Product Availability</h2>
     <p id="modalProduct" class="modal-product-name"></p>
     <form id="productEnquiryForm" class="enquiry-form">
-      <input type="hidden" id="selectedProduct">
-      <div class="form-two"><label>Full Name<input id="customerName" required></label><label>Company Name<input id="companyName"></label></div>
-      <div class="form-two"><label>Email<input id="customerEmail" type="email" required></label><label>Phone / WhatsApp<input id="customerPhone" required></label></div>
-      <div class="form-two"><label>Destination Country<input id="destinationCountry" required></label><label>Required Quantity<input id="requiredQuantity" placeholder="e.g. 500 packs"></label></div>
-      <label>Message / Requirements<textarea id="customerMessage" rows="4" placeholder="Packaging, target quantity, shipping requirements, etc."></textarea></label>
+      <input type="hidden" id="selectedProduct" name="Product">
+      <div class="form-two"><label>Full Name<input id="customerName" name="Full Name" required></label><label>Company Name<input id="companyName" name="Company Name"></label></div>
+      <div class="form-two"><label>Email<input id="customerEmail" name="Customer Email" type="email" required></label><label>Phone / WhatsApp<input id="customerPhone" name="Phone / WhatsApp" required></label></div>
+      <div class="form-two"><label>Destination Country<input id="destinationCountry" name="Destination Country" required></label><label>Required Quantity<input id="requiredQuantity" name="Required Quantity" placeholder="e.g. 500 packs"></label></div>
+      <label>Message / Requirements<textarea id="customerMessage" name="Message / Requirements" rows="4" placeholder="Packaging, target quantity, shipping requirements, etc."></textarea></label>
       <button class="btn btn-primary" type="submit">Send Availability Request</button>
       <small>Prices, stock, export eligibility and destination requirements are confirmed by Etnova Pharma after enquiry.</small>
     </form>

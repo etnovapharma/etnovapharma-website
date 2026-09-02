@@ -153,3 +153,7 @@ body{background:#fbfdfd}
 .floating-whatsapp span{display:none}
 .floating-whatsapp svg{width:30px;height:30px;display:block}
 @media(max-width:480px){.floating-whatsapp svg{width:28px;height:28px}}
+
+/* V12 working email + feedback */
+.live-feedback-wrap{margin-top:34px}.live-feedback-heading{margin-bottom:18px}.live-feedback-heading h3{margin:6px 0 0;font-size:25px;color:var(--navy)}.live-feedback-grid:empty{display:none}.live-review{animation:feedbackIn .35s ease both}.extra-feedback{display:none}.feedback-page-note{color:var(--muted)}@keyframes feedbackIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}button:disabled{opacity:.65;cursor:wait}
+@media(max-width:650px){.live-feedback-heading{align-items:flex-start}.live-feedback-heading .btn{width:auto}.live-feedback-heading{gap:12px}}
