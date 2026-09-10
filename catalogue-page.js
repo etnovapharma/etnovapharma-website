@@ -38,31 +38,27 @@ function showEnquiryResult(success, body, product, emailError=''){
  const title=success?'Request submitted':'Choose how to send your request';
  const message=success?'Your request has been sent to Etnova Pharma. WhatsApp is also ready with your enquiry.':(emailError||'The email service could not confirm delivery. You can send the same request directly by email or WhatsApp.');
  const el=document.createElement('div'); el.id='enquiryResultModal'; el.className='product-modal open'; el.setAttribute('aria-hidden','false');
- el.innerHTML=`<div class="modal-backdrop" data-result-close></div><div class="modal-panel result-panel" role="dialog" aria-modal="true" aria-labelledby="enquiryResultTitle"><button class="modal-close" type="button" aria-label="Close" data-result-close>×</button><span class="eyebrow">${success?'REQUEST RECEIVED':'ENQUIRY READY'}</span><h2 id="enquiryResultTitle">${title}</h2><p class="modal-product-name">${esc(product)}</p><p>${esc(message)}</p><div class="result-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener">Open WhatsApp</a><a class="btn btn-outline" href="${mail}">Send by Email</a><button class="btn btn-outline" type="button" data-result-close>Close</button></div><small>For automatic email delivery, the FormSubmit endpoint for etnovapharma@gmail.com must be activated once.</small></div>`;
+ el.innerHTML=`<div class="modal-backdrop" data-result-close></div><div class="modal-panel result-panel" role="dialog" aria-modal="true" aria-labelledby="enquiryResultTitle"><button class="modal-close" type="button" aria-label="Close" data-result-close>×</button><span class="eyebrow">${success?'REQUEST RECEIVED':'ENQUIRY READY'}</span><h2 id="enquiryResultTitle">${title}</h2><p class="modal-product-name">${esc(product)}</p><p>${esc(message)}</p><div class="result-actions"><a class="btn btn-primary" href="${wa}" target="_blank" rel="noopener">Open WhatsApp</a><a class="btn btn-outline" href="${mail}">Send by Email</a><button class="btn btn-outline" type="button" data-result-close>Close</button></div><small>The enquiry is sent to Etnova Pharma and a copy is requested for the customer email entered in the form.</small></div>`;
  document.body.appendChild(el);
  el.querySelectorAll('[data-result-close]').forEach(x=>x.addEventListener('click',()=>el.remove()));
 }
 
 document.getElementById('productEnquiryForm').onsubmit=async e=>{
  e.preventDefault();
- const f=e.currentTarget;
- if(!f.reportValidity()) return;
+ const f=e.currentTarget; if(!f.reportValidity()) return;
  const product=document.getElementById('selectedProduct').value;
- const body=`Hello Etnova Pharma,\n\nI would like to request availability for:\n${product}\n\nFull Name: ${document.getElementById('customerName').value}\nCompany: ${document.getElementById('companyName').value}\nEmail: ${document.getElementById('customerEmail').value}\nPhone / WhatsApp: ${document.getElementById('customerPhone').value}\nDestination Country: ${document.getElementById('destinationCountry').value}\nRequired Quantity: ${document.getElementById('requiredQuantity').value}\nMessage: ${document.getElementById('customerMessage').value}\n\nPlease confirm current availability, pricing, packaging and export requirements.`;
- const waUrl=`https://wa.me/918983128824?text=${encodeURIComponent(body)}`;
- // Launch WhatsApp from the user's submit gesture before the async request, avoiding popup blockers.
- const waWindow=window.open(waUrl,'_blank','noopener');
- const data=new FormData(f);
- data.set('_subject','Product Availability Request - '+product);
- data.set('_captcha','false'); data.set('_template','table'); data.set('WhatsApp message',body);
- const btn=f.querySelector('button[type="submit"]'); const old=btn.textContent; btn.disabled=true; btn.textContent='Sending…';
- try{
-   const r=await fetch('https://formsubmit.co/ajax/etnovapharma@gmail.com',{method:'POST',headers:{'Accept':'application/json'},body:data});
-   const result=await r.json().catch(()=>({}));
-   if(!r.ok || result.success===false) throw new Error(result.message||'Email delivery was not confirmed.');
-   f.reset(); closeModal(); showEnquiryResult(true,body,product);
- }catch(err){
-   if(!waWindow) window.open(waUrl,'_blank','noopener');
-   showEnquiryResult(false,body,product,'WhatsApp has been opened. Automatic Gmail delivery was not confirmed by the email service.');
- }finally{btn.disabled=false;btn.textContent=old;}
+ const value=id=>document.getElementById(id)?.value?.trim()||'';
+ const email=value('customerEmail');
+ const body=`Hello Etnova Pharma,\n\nI would like to request availability for:\n${product}\n\nFull Name: ${value('customerName')}\nCompany: ${value('companyName')}\nEmail: ${email}\nPhone / WhatsApp: ${value('customerPhone')}\nDestination Country: ${value('destinationCountry')}\nRequired Quantity: ${value('requiredQuantity')}\nMessage: ${value('customerMessage')}\n\nPlease confirm current availability, pricing, packaging and export requirements.`;
+ const wa=`https://wa.me/918983128824?text=${encodeURIComponent(body)}`;
+ let waWindow=null; try{waWindow=window.open(wa,'_blank','noopener,noreferrer');}catch(_){ }
+ const btn=f.querySelector('button[type="submit"]'); const old=btn?.textContent||'Send Availability Request'; if(btn){btn.disabled=true;btn.textContent='Sending…';}
+ const data=new URLSearchParams();
+ data.set('Product',product); data.set('name',value('customerName')); data.set('email',email); data.set('Full Name',value('customerName')); data.set('Company Name',value('companyName')); data.set('Customer Email',email); data.set('Phone / WhatsApp',value('customerPhone')); data.set('Destination Country',value('destinationCountry')); data.set('Required Quantity',value('requiredQuantity')); data.set('Message / Requirements',value('customerMessage')); data.set('WhatsApp message',body); data.set('_subject','Product Availability Request - '+product); data.set('_replyto',email); data.set('_cc',email); data.set('_captcha','false'); data.set('_template','table'); data.set('_url',window.location.href);
+ let accepted=false;
+ try{const r=await fetch('https://formsubmit.co/ajax/etnovapharma@gmail.com',{method:'POST',headers:{'Accept':'application/json','Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:data.toString()}); const result=await r.json().catch(()=>({})); accepted=r.ok&&result.success!==false;}catch(_){accepted=false;}
+ if(!waWindow){try{window.open(wa,'_blank','noopener,noreferrer');}catch(_){}}
+ if(accepted){showEnquiryResult(true,body,product); f.reset(); closeModal();}
+ else{showEnquiryResult(false,body,product,'WhatsApp has been opened. Automatic Gmail delivery was not confirmed by the email service. A Send by Email option is available below.');}
+ if(btn){btn.disabled=false;btn.textContent=old;}
 };document.getElementById('year').textContent=new Date().getFullYear();

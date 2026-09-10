@@ -94,60 +94,33 @@ if (searchForm) searchForm.addEventListener('submit', (e) => { e.preventDefault(
 render(false);
 
 const enquiryForm = document.getElementById('productEnquiryForm');
+function showProductNotice(title, message, product, body, success=true){
+  let box=document.getElementById('productNotice');
+  if(!box){box=document.createElement('div');box.id='productNotice';box.className='enquiry-notice';document.body.appendChild(box);}
+  const mail=`mailto:etnovapharma@gmail.com?subject=${encodeURIComponent('Product Availability Request - '+product)}&body=${encodeURIComponent(body)}`;
+  box.innerHTML=`<div class="enquiry-notice-card ${success?'success':'warning'}"><button type="button" class="enquiry-notice-close" aria-label="Close">×</button><div class="enquiry-notice-icon">${success?'✓':'!'}</div><h3>${esc(title)}</h3><p>${esc(message)}</p>${success?'':'<a class="btn btn-outline" style="display:inline-block;margin:0 8px 8px 0" href="'+mail+'">Send Email Copy</a>'}<button type="button" class="btn btn-primary enquiry-notice-ok">OK</button></div>`;
+  box.classList.add('open');
+  box.querySelector('.enquiry-notice-close').onclick=()=>box.classList.remove('open');
+  box.querySelector('.enquiry-notice-ok').onclick=()=>box.classList.remove('open');
+}
 if (enquiryForm) enquiryForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const f = e.currentTarget;
-  const product = document.getElementById('selectedProduct')?.value || 'Product enquiry';
-  const value = id => document.getElementById(id)?.value?.trim() || '';
-  const body = `Hello Etnova Pharma,\n\nI would like to request availability for:\n${product}\n\nFull Name: ${value('customerName')}\nCompany: ${value('companyName')}\nEmail: ${value('customerEmail')}\nPhone / WhatsApp: ${value('customerPhone')}\nDestination Country: ${value('destinationCountry')}\nRequired Quantity: ${value('requiredQuantity')}\nMessage: ${value('customerMessage')}\n\nPlease confirm current availability, pricing, packaging and export requirements.`;
-  const waUrl = `https://wa.me/918983128824?text=${encodeURIComponent(body)}`;
-  // Open WhatsApp immediately while this is still a user gesture, so popup blockers are less likely to stop it.
-  let waWindow = null;
-  try { waWindow = window.open(waUrl, '_blank', 'noopener,noreferrer'); } catch (_) {}
-
-  const btn = f.querySelector('button[type="submit"]');
-  const old = btn?.textContent || 'Send Availability Request';
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
-
-  const data = new URLSearchParams();
-  data.set('Product', product);
-  data.set('Full Name', value('customerName'));
-  data.set('Company Name', value('companyName'));
-  data.set('Customer Email', value('customerEmail'));
-  data.set('Phone / WhatsApp', value('customerPhone'));
-  data.set('Destination Country', value('destinationCountry'));
-  data.set('Required Quantity', value('requiredQuantity'));
-  data.set('Message / Requirements', value('customerMessage'));
-  data.set('WhatsApp message', body);
-  data.set('_subject', 'Product Availability Request - ' + product);
-  data.set('_captcha', 'false');
-  data.set('_template', 'table');
-
-  let emailSent = false;
-  try {
-    const r = await fetch('https://formsubmit.co/ajax/etnovapharma@gmail.com', {
-      method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-      body: data.toString()
-    });
-    const result = await r.json().catch(() => ({}));
-    emailSent = r.ok && result.success !== false;
-  } catch (_) { emailSent = false; }
-
-  if (!waWindow) {
-    try { window.location.href = waUrl; } catch (_) {}
-  }
-
-  if (emailSent) {
-    alert('Your availability request has been sent to etnovapharma@gmail.com and WhatsApp has been opened with the same enquiry.');
-    f.reset();
-    closeProduct();
-  } else {
-    const mailto = `mailto:etnovapharma@gmail.com?subject=${encodeURIComponent('Product Availability Request - ' + product)}&body=${encodeURIComponent(body)}`;
-    const sendEmail = confirm('WhatsApp has been opened. The website email service did not confirm delivery. Click OK to open your email app with the complete enquiry addressed to etnovapharma@gmail.com.');
-    if (sendEmail) window.location.href = mailto;
-  }
-  if (btn) { btn.disabled = false; btn.textContent = old; }
+  const f=e.currentTarget; if(!f.reportValidity()) return;
+  const product=document.getElementById('selectedProduct')?.value || 'Product enquiry';
+  const value=id=>document.getElementById(id)?.value?.trim() || '';
+  const email=value('customerEmail');
+  const body=`Hello Etnova Pharma,\n\nI would like to request availability for:\n${product}\n\nFull Name: ${value('customerName')}\nCompany: ${value('companyName')}\nEmail: ${email}\nPhone / WhatsApp: ${value('customerPhone')}\nDestination Country: ${value('destinationCountry')}\nRequired Quantity: ${value('requiredQuantity')}\nMessage: ${value('customerMessage')}\n\nPlease confirm current availability, pricing, packaging and export requirements.`;
+  const wa=`https://wa.me/918983128824?text=${encodeURIComponent(body)}`;
+  let waWindow=null; try{waWindow=window.open(wa,'_blank','noopener,noreferrer');}catch(_){ }
+  const btn=f.querySelector('button[type="submit"]'); const old=btn?.textContent||'Send Availability Request'; if(btn){btn.disabled=true;btn.textContent='Sending…';}
+  const data=new URLSearchParams();
+  data.set('Product',product); data.set('name',value('customerName')); data.set('email',email); data.set('Full Name',value('customerName')); data.set('Company Name',value('companyName')); data.set('Customer Email',email); data.set('Phone / WhatsApp',value('customerPhone')); data.set('Destination Country',value('destinationCountry')); data.set('Required Quantity',value('requiredQuantity')); data.set('Message / Requirements',value('customerMessage')); data.set('WhatsApp message',body); data.set('_subject','Product Availability Request - '+product); data.set('_replyto',email); data.set('_cc',email); data.set('_captcha','false'); data.set('_template','table'); data.set('_url',window.location.href);
+  let accepted=false;
+  try{const r=await fetch('https://formsubmit.co/ajax/etnovapharma@gmail.com',{method:'POST',headers:{'Accept':'application/json','Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:data.toString()}); const result=await r.json().catch(()=>({})); accepted=r.ok && result.success!==false;}catch(_){accepted=false;}
+  if(!waWindow){try{window.open(wa,'_blank','noopener,noreferrer');}catch(_){}}
+  if(accepted){showProductNotice('Request submitted',`Your request for ${product} was accepted for delivery to Etnova Pharma. A copy has also been requested for ${email}. WhatsApp has been opened with the same enquiry.`,product,body,true); f.reset(); if(typeof closeProduct==='function')closeProduct(); if(typeof closeModal==='function')closeModal();}
+  else{showProductNotice('Email delivery not confirmed','WhatsApp has been opened with your complete enquiry. The email service did not confirm delivery, so you can send the same enquiry directly by email using the button below.',product,body,false);}
+  if(btn){btn.disabled=false;btn.textContent=old;}
 });
 
 const year = document.getElementById('year');

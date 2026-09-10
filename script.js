@@ -17,18 +17,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
 
-  // Real email delivery without a database. FormSubmit forwards submissions to the company inbox.
+  // Central email delivery helper. The sender's email is used as Reply-To and CC so the sender also receives a copy.
   async function sendToEmail(form, subject, extraFields = {}) {
-    const data = new FormData(form);
+    const fd = new FormData(form);
+    const data = new URLSearchParams();
+    fd.forEach((v, k) => data.set(k, v));
     Object.entries(extraFields).forEach(([k,v]) => data.set(k, v));
+    const sender = fd.get('email') || fd.get('Customer Email') || '';
+    if (sender) {
+      data.set('email', sender);
+      data.set('_replyto', sender);
+      data.set('_cc', sender);
+    }
     data.set('_subject', subject);
     data.set('_captcha', 'false');
     data.set('_template', 'table');
+    data.set('_url', window.location.href);
     const res = await fetch('https://formsubmit.co/ajax/etnovapharma@gmail.com', {
-      method: 'POST', headers: { 'Accept': 'application/json' }, body: data
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: data.toString()
     });
-    if (!res.ok) throw new Error('Email service error');
-    return res.json().catch(() => ({}));
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok || result.success === false) throw new Error(result.message || 'Email service error');
+    return result;
   }
 
   const form = document.getElementById('enquiryForm');
@@ -88,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await sendToEmail(f, `Customer Feedback - ${rating}/5`, { 'Rating': `${rating}/5` });
       saveFeedback(item); renderFeedback();
       f.reset(); rating = 0; stars.forEach(x => x.classList.remove('selected')); if (out) out.textContent = 'Select a rating';
-      alert('Thank you! Your feedback has been sent to Etnova Pharma and added to the feedback section on this device.');
+      siteNotice('Feedback submitted', `Thank you. Your feedback has been sent to Etnova Pharma and a copy has been requested for ${item.email}.`);
     } catch (err) {
       alert('We could not send your feedback right now. Please try again.');
     } finally { btn.disabled = false; btn.textContent = old; }
