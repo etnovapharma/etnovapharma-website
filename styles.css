@@ -174,3 +174,9 @@ body{background:#fbfdfd}
 @media(max-width:620px){ .catalog-result-bar-simple { align-items:flex-start; flex-direction:column; } }
 
 .catalog-layout-full{display:block}.catalog-products-area{width:100%}.catalog-layout-full .product-grid-wide{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:1100px){.catalog-layout-full .product-grid-wide{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:800px){.catalog-layout-full .product-grid-wide{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.catalog-layout-full .product-grid-wide{grid-template-columns:1fr}}
+
+/* Enquiry result popup: keeps the customer on the same catalogue page. */
+.result-panel { max-width: 620px; }
+.result-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:20px; }
+.result-actions .btn { flex:1 1 170px; text-align:center; text-decoration:none; }
+@media (max-width:640px){ .result-actions .btn { flex-basis:100%; } }
