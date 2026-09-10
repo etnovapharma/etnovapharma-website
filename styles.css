@@ -157,3 +157,20 @@ body{background:#fbfdfd}
 /* V12 working email + feedback */
 .live-feedback-wrap{margin-top:34px}.live-feedback-heading{margin-bottom:18px}.live-feedback-heading h3{margin:6px 0 0;font-size:25px;color:var(--navy)}.live-feedback-grid:empty{display:none}.live-review{animation:feedbackIn .35s ease both}.extra-feedback{display:none}.feedback-page-note{color:var(--muted)}@keyframes feedbackIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}button:disabled{opacity:.65;cursor:wait}
 @media(max-width:650px){.live-feedback-heading{align-items:flex-start}.live-feedback-heading .btn{width:auto}.live-feedback-heading{gap:12px}}
+
+/* Full catalogue controls */
+.catalog-intro{margin-bottom:20px;max-width:850px}.catalog-intro h2{margin:.25rem 0 .45rem}.catalog-tools-full{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:end}.catalog-tools-full label{display:grid;gap:7px;font-weight:700;font-size:.9rem}.catalog-tools-full input,.catalog-tools-full select{width:100%;box-sizing:border-box}.catalog-result-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0;font-size:.9rem;font-weight:700}.catalog-product .product-body{min-height:190px}.catalog-product h3{overflow-wrap:anywhere}.catalog-product .pill{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:760px){.catalog-tools-full{grid-template-columns:1fr}.catalog-result-bar{align-items:flex-start}.catalog-product .product-body{min-height:0}}
+
+/* Full catalogue search controls */
+.catalog-tools-full { grid-template-columns: minmax(0,1fr) 300px auto; }
+.catalog-tools-full .search-wrap input { min-width: 0; }
+.catalog-search-submit { align-self: end; min-height: 48px; white-space: nowrap; }
+.catalog-result-bar-simple { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:14px 0 18px; font-size:.9rem; font-weight:700; color:var(--muted); }
+.product-card-clickable { cursor:pointer; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.product-card-clickable:hover { transform:translateY(-3px); box-shadow:0 14px 28px rgba(16,35,91,.10); border-color:#b9d5ef; }
+.product-card-clickable:focus-visible { outline:3px solid rgba(25,55,143,.2); outline-offset:3px; }
+@media(max-width:900px){ .catalog-tools-full { grid-template-columns:1fr; } .catalog-search-submit { width:100%; } }
+@media(max-width:620px){ .catalog-result-bar-simple { align-items:flex-start; flex-direction:column; } }
+
+.catalog-layout-full{display:block}.catalog-products-area{width:100%}.catalog-layout-full .product-grid-wide{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:1100px){.catalog-layout-full .product-grid-wide{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:800px){.catalog-layout-full .product-grid-wide{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.catalog-layout-full .product-grid-wide{grid-template-columns:1fr}}
