@@ -17,29 +17,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
 
-  // Central email delivery helper. The sender's email is used as Reply-To and CC so the sender also receives a copy.
+  // Secure website email helper. Uses the site's own Vercel API endpoint and Google Workspace mailbox.
   async function sendToEmail(form, subject, extraFields = {}) {
     const fd = new FormData(form);
-    const data = new URLSearchParams();
-    fd.forEach((v, k) => data.set(k, v));
-    Object.entries(extraFields).forEach(([k,v]) => data.set(k, v));
-    const sender = fd.get('email') || fd.get('Customer Email') || '';
-    if (sender) {
-      data.set('email', sender);
-      data.set('_replyto', sender);
-      data.set('_cc', sender);
-    }
-    data.set('_subject', subject);
-    data.set('_captcha', 'false');
-    data.set('_template', 'table');
-    data.set('_url', window.location.href);
-    const res = await fetch('https://formsubmit.co/ajax/etnovapharma@gmail.com', {
+    const payload = {};
+    fd.forEach((v, k) => { payload[k] = v; });
+    Object.entries(extraFields).forEach(([k, v]) => { payload[k] = v; });
+    payload._subject = subject;
+    payload._page = window.location.href;
+    const res = await fetch('/api/send-enquiry', {
       method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-      body: data.toString()
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
     const result = await res.json().catch(() => ({}));
-    if (!res.ok || result.success === false) throw new Error(result.message || 'Email service error');
+    if (!res.ok || result.success !== true) throw new Error(result.message || 'Email delivery failed');
     return result;
   }
 
