@@ -43,6 +43,18 @@ document.addEventListener('DOMContentLoaded', () => {
     return result;
   }
 
+  const craveThumb = document.querySelector('.crave-thumb');
+  const craveMain = document.getElementById('craveMainImage');
+  if (craveThumb && craveMain) {
+    craveThumb.addEventListener('click', () => {
+      const next = craveThumb.dataset.image;
+      const current = craveMain.getAttribute('src');
+      craveMain.setAttribute('src', next);
+      craveThumb.dataset.image = current;
+      craveThumb.querySelector('span').textContent = next.includes('info') ? 'View product photo →' : "See what's inside →";
+    });
+  }
+
   const form = document.getElementById('enquiryForm');
   if (form) {
     form.addEventListener('submit', async e => {
@@ -82,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!grid) return;
     grid.innerHTML = list.map((x, i) => `<article class="review live-review"><div class="review-head"><span class="avatar">${escapeHtml((x.name||'C').charAt(0).toUpperCase())}</span><div><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(x.date)}</small></div></div><div class="stars">${starsText(Number(x.rating))}</div><p>${escapeHtml(x.feedback)}</p><small>Customer feedback submitted on this website</small></article>`).join('');
     const more = document.getElementById('feedbackSeeMore');
-    if (more) more.hidden = list.length <= 2;
+    if (more) more.hidden = false;
     [...grid.children].forEach((el,i) => { if (i >= 2) el.classList.add('extra-feedback'); });
   }
   function escapeHtml(v) { return String(v).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
@@ -96,14 +108,17 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.disabled = true; btn.textContent = 'Sending…';
     const d = new FormData(f);
     const item = { name: d.get('name'), email: d.get('email'), feedback: d.get('feedback'), rating, date: new Date().toLocaleDateString('en-IN', {day:'2-digit',month:'2-digit',year:'numeric'}) };
+    // Save and render first so the customer never loses a valid feedback submission.
+    saveFeedback(item); renderFeedback();
     try {
-      await sendToEmail(f, `Customer Feedback - ${rating}/5`, { 'Rating': `${rating}/5` });
-      saveFeedback(item); renderFeedback();
-      f.reset(); rating = 0; stars.forEach(x => x.classList.remove('selected')); if (out) out.textContent = 'Select a rating';
-      siteNotice('Feedback submitted', `Thank you. Your feedback has been sent to Etnova Pharma and a copy has been requested for ${item.email}.`);
+      await sendToEmail(f, `Customer Feedback - ${item.rating}/5`, { 'Rating': `${item.rating}/5` });
+      siteNotice('Feedback submitted', `Thank you. Your feedback is now visible in See More Feedback and has been sent to Etnova Pharma for review.`);
     } catch (err) {
-      alert('We could not send your feedback right now. Please try again.');
-    } finally { btn.disabled = false; btn.textContent = old; }
+      siteNotice('Feedback saved', `Your feedback is now visible in See More Feedback. Email delivery to Etnova Pharma could not be confirmed right now.`);
+    } finally {
+      f.reset(); rating = 0; stars.forEach(x => x.classList.remove('selected')); if (out) out.textContent = 'Select a rating';
+      btn.disabled = false; btn.textContent = old;
+    }
   });
 
   const see = document.getElementById('feedbackSeeMore');
